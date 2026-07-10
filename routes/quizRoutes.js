@@ -13,4 +13,6 @@ router.route('/:id')
   .get(protect, getQuizDetails)
   .post(protect, attemptQuiz);
 
+router.post('/:id/attempt', protect, attemptQuiz);
+
 export default router;

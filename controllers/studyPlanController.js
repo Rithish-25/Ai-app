@@ -13,7 +13,7 @@ export const generateNewStudyPlan = async (req, res) => {
     // Get subjects for user
     const subjects = await Subject.find({ userId });
     if (subjects.length === 0) {
-      return sendError(res, 'Please create at least one subject before generating a study plan', 400);
+      return sendError(res, 'Please create at least one subject to continue', 400);
     }
 
     // Get active study plan to extract existing countdowns (if any)

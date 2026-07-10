@@ -54,6 +54,13 @@ export const protect = async (req, res, next) => {
         },
       });
       logger.info(`Synchronized new user to MongoDB: ${user._id}`);
+    } else {
+      // Fallback: If user exists but has the placeholder name, update it from token
+      if (decodedToken.name && (user.displayName === 'AI Student' || !user.displayName)) {
+        user.displayName = decodedToken.name;
+        await user.save();
+        logger.info(`Updated existing user's default display name to: ${decodedToken.name}`);
+      }
     }
 
     // Attach user to request

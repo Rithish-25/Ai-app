@@ -35,7 +35,7 @@ export const generateNewQuiz = async (req, res) => {
     }
 
     if (!sourceText || sourceText.trim().length < 50) {
-      return sendError(res, 'Insufficient study materials found. Please upload text documents first to generate quizzes.', 400);
+      sourceText = `Subject Topic: ${subject.name}\nSubject Description: ${subject.description || 'General study guidelines for ' + subject.name}`;
     }
 
     logger.info(`Generating ${count} questions of type ${type} for subject: ${subject.name}`);
