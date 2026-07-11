@@ -221,3 +221,23 @@ export const createManualTask = async (req, res) => {
     return sendError(res, 'Failed to add manual task', 500, error);
   }
 };
+
+// Clear/delete all tasks in study plan
+export const clearStudyPlanTasks = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const plan = await StudyPlan.findOne({ userId }).sort({ createdAt: -1 });
+    if (!plan) {
+      return sendError(res, 'Study plan not found', 404);
+    }
+
+    plan.tasks = []; // clear all tasks
+    await plan.save();
+
+    logger.info(`Cleared all study plan tasks for user ${userId}`);
+    return sendSuccess(res, plan, 'Study plan tasks cleared successfully');
+  } catch (error) {
+    logger.error(`Error in clearStudyPlanTasks: ${error.message}`);
+    return sendError(res, 'Failed to clear study plan tasks', 500, error);
+  }
+};

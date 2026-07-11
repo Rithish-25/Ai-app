@@ -201,3 +201,32 @@ export const attemptQuiz = async (req, res) => {
     return sendError(res, 'Failed to grade quiz attempt', 500, error);
   }
 };
+
+// Delete a quiz and clean up score histories
+export const deleteQuiz = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const quiz = await Quiz.findOne({ _id: id, userId });
+    if (!quiz) {
+      return sendError(res, 'Quiz not found or unauthorized', 404);
+    }
+
+    // 1. Delete the quiz
+    await Quiz.deleteOne({ _id: id, userId });
+
+    // 2. Clean up score histories in Progress document
+    const progress = await Progress.findOne({ userId });
+    if (progress) {
+      progress.quizScores = progress.quizScores.filter(q => q.quizId.toString() !== id);
+      await progress.save();
+    }
+
+    logger.info(`Quiz deleted: ${id} by user ${userId}`);
+    return sendSuccess(res, null, 'Quiz and its history deleted successfully');
+  } catch (error) {
+    logger.error(`Error in deleteQuiz: ${error.message}`);
+    return sendError(res, 'Failed to delete quiz', 500, error);
+  }
+};

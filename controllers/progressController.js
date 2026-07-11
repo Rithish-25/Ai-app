@@ -98,3 +98,26 @@ export const logStudySession = async (req, res) => {
     return sendError(res, 'Failed to log study session', 500, error);
   }
 };
+
+// Delete a specific quiz score history log entry
+export const deleteQuizScoreLog = async (req, res) => {
+  try {
+    const { logId } = req.params;
+    const userId = req.user._id;
+
+    const progress = await Progress.findOne({ userId });
+    if (!progress) {
+      return sendError(res, 'Progress profile not found', 404);
+    }
+
+    // Pull/remove the sub-document with the matching _id
+    progress.quizScores = progress.quizScores.filter(item => item._id.toString() !== logId);
+    await progress.save();
+
+    logger.info(`Deleted quiz history log entry ${logId} for user ${userId}`);
+    return sendSuccess(res, progress, 'Quiz history log entry deleted successfully');
+  } catch (error) {
+    logger.error(`Error in deleteQuizScoreLog: ${error.message}`);
+    return sendError(res, 'Failed to delete quiz history log entry', 500, error);
+  }
+};
